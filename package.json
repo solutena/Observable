@@ -2,4 +2,7 @@
   "name": "com.solutena.observable",
   "version": "1.0.0",
   "displayName": "Observable"
+  "author": {
+    "name": "Solutena"
+  }
 }
