@@ -1,15 +1,19 @@
+# Observable
+
+옵저버 패턴을 구현하여 값이 변경될 때 구독자들에게 알림을 보내는 기능을 제공합니다.
+
 # 설치
 
-![image](https://github.com/user-attachments/assets/97fd85b1-10d7-48b1-a496-77d26d90dbe9)
+![image](https://github.com/user-attachments/assets/174185db-6090-42e7-93b7-01b3f0701315)
 
 1. URL 복사
 
 ![image](https://github.com/user-attachments/assets/f4060f1d-94aa-4a49-b001-e7a5e01316e1)
 
 2. 패키지 매니저에서 Add Package from Git URL 선택
-   
-![image](https://github.com/user-attachments/assets/1ada1140-2c98-4227-87fb-13fd64c693ef)
 
+![image](https://github.com/user-attachments/assets/a4af4faf-2741-48ea-b525-29bc0a09688b)
+   
 3.  복사한 URL로 설치
 
 # Observable<T>
