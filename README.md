@@ -2,6 +2,20 @@
 
 `Observable<T>`는 제네릭 클래스로, 옵저버 패턴을 구현하여 값이 변경될 때 구독자들에게 알림을 보내는 기능을 제공합니다.
 
+## 설치
+
+![image](https://github.com/user-attachments/assets/97fd85b1-10d7-48b1-a496-77d26d90dbe9)
+
+1. URL 복사
+
+![image](https://github.com/user-attachments/assets/f4060f1d-94aa-4a49-b001-e7a5e01316e1)
+
+2. 패키지 매니저에서 Add Package from Git URL 선택
+   
+![image](https://github.com/user-attachments/assets/1ada1140-2c98-4227-87fb-13fd64c693ef)
+
+3.  복사한 URL로 설치
+
 
 ## 이벤트
 - **OnChanged:** 값이 변경될 때마다 호출됩니다. 이를 통해 값이 변경될 때 특정 동작을 수행할 수 있습니다.
