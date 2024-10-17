@@ -64,7 +64,7 @@ Hp.OnChanged += (int value) =>
 
 여러 개의 값이 있는 컬렉션(List<T>, Dictionary<K, V> 등)의 변경 사항을 감지할 수 있도록 설계된 컬렉션입니다.
 
-## 기능
+## 함수
 - **Add:** 항목을 컬렉션에 추가하고 `OnAdd` 이벤트를 발생시킵니다. 후에 `OnChanged` 이벤트를 발생시킵니다.
 - **Remove:** 항목을 컬렉션에서 제거하고 `OnRemove` 이벤트를 발생시킵니다. 후에 `OnChanged` 이벤트를 발생시킵니다.
 - **Clear:** 모든 항목을 삭제하고 `OnRemove` 이벤트를 개별 항목에 대해 발생시킵니다. 후에 `OnChanged` 이벤트를 발생시킵니다.
