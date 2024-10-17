@@ -1,8 +1,4 @@
-# Observable<T>
-
-`Observable<T>`는 제네릭 클래스로, 옵저버 패턴을 구현하여 값이 변경될 때 구독자들에게 알림을 보내는 기능을 제공합니다.
-
-## 설치
+# 설치
 
 ![image](https://github.com/user-attachments/assets/97fd85b1-10d7-48b1-a496-77d26d90dbe9)
 
@@ -16,6 +12,9 @@
 
 3.  복사한 URL로 설치
 
+# Observable<T>
+
+`Observable<T>`는 제네릭 클래스로, 옵저버 패턴을 구현하여 값이 변경될 때 구독자들에게 알림을 보내는 기능을 제공합니다.
 
 ## 이벤트
 - **OnChanged:** 값이 변경될 때마다 호출됩니다. 이를 통해 값이 변경될 때 특정 동작을 수행할 수 있습니다.
