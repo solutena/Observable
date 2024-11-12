@@ -26,8 +26,6 @@ public class ObservableCollection<T> : ICollection<T>
 
 	public void Add(T item)
 	{
-		if (_collection.Contains(item))
-			return;
 		_collection.Add(item);
 		OnAdd?.Invoke(item);
 		OnChanged?.Invoke(this);
