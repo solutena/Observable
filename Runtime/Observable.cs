@@ -1,36 +1,33 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
-public class Observable<T> where T : struct
+public class Observable<T> : INotifyPropertyChanged
 {
-	T _value;
+	private T _value;
 
-	public Observable(T value)
-	{
-		_value = value;
-	}
+	public event PropertyChangedEventHandler PropertyChanged;
 
 	public T Value
 	{
-		get { return _value; }
+		get => _value;
 		set
 		{
-			if (_value.Equals(value) == false)
+			if (EqualityComparer<T>.Default.Equals(_value, value) == false)
 			{
 				_value = value;
-				OnChanged?.Invoke(this);
+				OnPropertyChanged(nameof(Value));
 			}
 		}
 	}
-	
-	public void Refresh()
+
+	protected virtual void OnPropertyChanged(string propertyName)
 	{
-		OnChanged?.Invoke(this);
+		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
 
 	public static implicit operator T(Observable<T> observable)
 	{
 		return observable.Value;
 	}
-
-	public event Action<T> OnChanged;
 }
