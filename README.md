@@ -18,12 +18,12 @@
 
 # Observable\<T\>
 
-Observable\<T\> 클래스는 T 타입의 값에서 변경 사항을 추적할 수 있는 간단한 방법을 제공합니다.
+`Observable<T>` 클래스는 T 타입의 값에서 변경 사항을 추적할 수 있는 간단한 방법을 제공합니다.
 
 값이 업데이트될 때 이벤트를 발생시키는 메커니즘이 포함되어 있습니다.
 
 ## 이벤트
-값이 변경되면 OnChanged 이벤트가 호출됩니다.
+값이 변경되면 `OnChanged` 이벤트가 호출됩니다.
 
 이 이벤트는 이전 값과 현재 값을 전달합니다.
 
@@ -75,24 +75,24 @@ public class Example : ISerializationCallbackReceiver
 직렬화 데이터에서 사용하는 예제입니다.
 
 # 컬렉션
-ObservableDictionary\<TKey, TValue\>
+`ObservableDictionary<TKey, TValue>`
 
-ObservableHashSet\<T\>
+`ObservableHashSet<T>`
 
-ObservableList\<T\>
+`ObservableList<T>`
 
 지원되는 컬렉션입니다.
 
 ## 이벤트
 컬렉션이 변경되면 두가지 이벤트가 호출됩니다.
 
-OnItemChanged : 변경된 값과, 변경 타입을 전달합니다.
+`OnItemChanged` : 변경된 값과, 변경 타입을 전달합니다.
 
-OnCollectionChanged : 변경된 컬렉션을 전달합니다.
+`OnCollectionChanged` : 변경된 컬렉션을 전달합니다.
 
 ## 변경 타입
-Added : 추가
+`Added` : 추가
 
-Removed : 제거
+`Removed` : 제거
 
-Updated : 변경
+`Updated` : 변경
