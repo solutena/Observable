@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
-public class Observable<T> : INotifyPropertyChanged
+public class Observable<T>
 {
 	private T _value;
 
-	public event PropertyChangedEventHandler PropertyChanged;
+	public delegate void OnChangedHandler(T prev, T current);
+	public event OnChangedHandler OnChanged;
+
+	public Observable() => _value = default;
+	public Observable(T value) => _value = value;
 
 	public T Value
 	{
@@ -15,15 +18,11 @@ public class Observable<T> : INotifyPropertyChanged
 		{
 			if (EqualityComparer<T>.Default.Equals(_value, value) == false)
 			{
+				var prev = _value;
 				_value = value;
-				OnPropertyChanged(nameof(Value));
+				OnChanged(prev, _value);
 			}
 		}
-	}
-
-	protected virtual void OnPropertyChanged(string propertyName)
-	{
-		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
 
 	public static implicit operator T(Observable<T> observable)
