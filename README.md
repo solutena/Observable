@@ -83,6 +83,19 @@ public class Example : ISerializationCallbackReceiver
 
 지원되는 컬렉션입니다.
 
+```C#
+ObservableList<int> observableList = new();
+observableList.OnItemChanged += OnItemChanged;
+
+void OnItemChanged(int item, ChangedType changedType)
+{
+}
+
+```
+이벤트를 자동완성하면, 알맞은 타입으로 구성되어
+
+타입 오류를 방지하고 편리하게 사용할 수 있습니다.
+
 ## 이벤트
 컬렉션이 변경되면 두가지 이벤트가 호출됩니다.
 
