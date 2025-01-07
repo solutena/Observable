@@ -22,20 +22,21 @@
 
 값이 업데이트될 때 이벤트를 발생시키는 메커니즘이 포함되어 있습니다.
 
-## 이벤트
+직렬화를 지원합니다.
+
+### 이벤트
 값이 변경되면 `OnChanged` 이벤트가 호출됩니다.
 
 이 이벤트는 이전 값과 현재 값을 전달합니다.
 
-## 암시적 변환
+### 암시적 변환
 Observable<T> 객체를 T 타입으로 암시적으로 변환합니다.
 ```C#
 var o = new Observable<int>(10);
 int i = o;
 ```
 
-## 사용법
-### 예제
+## 예제
 ```C#
 var o = new Observable<int>(10);
 
@@ -48,31 +49,6 @@ o.OnChanged += (prev, current) =>
 o.Value = 20; // 출력: Value changed from 10 to 20
 ```
 
-### 직렬화 데이터
-```csharp
-using System;
-using UnityEngine;
-
-[Serializable]
-public class Example : ISerializationCallbackReceiver
-{
-	[SerializeField] int hp;
-
-	public Observable<int> HP { get; set; }
-
-	public void OnAfterDeserialize()
-	{
-		hp = HP;
-	}
-
-	public void OnBeforeSerialize()
-	{
-		HP = new Observable<int>(hp);
-	}
-}
-```
-직렬화 데이터에서 사용하는 예제입니다.
-
 # IObservableCollection
 `ObservableDictionary<TKey, TValue>`
 
@@ -82,6 +58,37 @@ public class Example : ISerializationCallbackReceiver
 
 지원되는 컬렉션입니다.
 
+직렬화를 지원합니다.
+
+### 이벤트
+컬렉션이 변경되면 이벤트가 호출됩니다.
+
+`OnAddedChanged` : 추가된 요소를 전달합니다.
+
+`OnRemovedChanged` : 삭제된 요소를 전달합니다.
+
+`OnUpdatedChanged` : 변경된 요소를 전달합니다. (ObservableList, ObservableDictionary)
+
+`OnCollectionChanged` : 변경된 컬렉션을 전달합니다.
+
+### 함수
+`TriggerAddedChanged(T item)` : OnAddedChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerRemovedChanged(T item)` : OnRemovedChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerUpdatedChanged(T item)` : OnUpdatedChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
+
+
+### 암시적 변환
+컬렉션을 해당 타입으로 암시적으로 변환합니다.
+```C#
+ObservableList<int> o = new();
+List<int> l = o;
+```
+
+## 예제
 ```C#
 ObservableList<int> o = new();
 o.OnAddedChanged += OnAddedChanged;
@@ -93,31 +100,3 @@ void OnAddedChanged(int item)
 이벤트를 자동완성하면, 알맞은 타입으로 구성되어
 
 타입 오류를 방지하고 편리하게 사용할 수 있습니다.
-
-## 이벤트
-컬렉션이 변경되면 이벤트가 호출됩니다.
-
-`OnAddedChanged` : 추가된 요소를 전달합니다.
-
-`OnRemovedChanged` : 삭제된 요소를 전달합니다.
-
-`OnUpdatedChanged` : 변경된 요소를 전달합니다. (ObservableList, ObservableDictionary)
-
-`OnCollectionChanged` : 변경된 컬렉션을 전달합니다.
-
-## 함수
-`TriggerAddedChanged(T item)` : OnAddedChanged 이벤트를 강제로 호출합니다.  
-
-`TriggerRemovedChanged(T item)` : OnRemovedChanged 이벤트를 강제로 호출합니다.  
-
-`TriggerUpdatedChanged(T item)` : OnUpdatedChanged 이벤트를 강제로 호출합니다.  
-
-`TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
-
-
-## 암시적 변환
-컬렉션을 해당 타입으로 암시적으로 변환합니다.
-```C#
-ObservableList<int> o = new();
-List<int> l = o;
-```
