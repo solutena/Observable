@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ObservableCollection;
 
-public class ObservableHashSet<T> : ICollection<T>, IObservable<T>
+public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 {
 	private readonly HashSet<T> _hashSet;
 
-	public event IObservable<T>.OnItemChangedHandler OnItemChanged;
-	public event IObservable<T>.OnCollectionChangedHandler OnCollectionChanged;
+	public event IObservableCollection<T>.OnItemChangedHandler OnItemChanged;
+	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
 	public ObservableHashSet(HashSet<T> hashSet)
@@ -26,7 +27,7 @@ public class ObservableHashSet<T> : ICollection<T>, IObservable<T>
 	{
 		if (_hashSet.Add(item))
 		{
-			TriggerItemChanged(item, ObservableListChangedType.Added);
+			TriggerItemChanged(item, ChangedType.Added);
 			TriggerCollectionChanged();
 			return true;
 		}
@@ -37,7 +38,7 @@ public class ObservableHashSet<T> : ICollection<T>, IObservable<T>
 	{
 		if (_hashSet.Remove(item))
 		{
-			TriggerItemChanged(item, ObservableListChangedType.Removed);
+			TriggerItemChanged(item, ChangedType.Removed);
 			TriggerCollectionChanged();
 			return true;
 		}
@@ -51,11 +52,11 @@ public class ObservableHashSet<T> : ICollection<T>, IObservable<T>
 		var prevList = new List<T>(_hashSet);
 		_hashSet.Clear();
 		foreach (var item in prevList)
-			TriggerItemChanged(item, ObservableListChangedType.Removed);
+			TriggerItemChanged(item, ChangedType.Removed);
 		TriggerCollectionChanged();
 	}
 
-	public void TriggerItemChanged(T item, ObservableListChangedType changedType)
+	public void TriggerItemChanged(T item, ChangedType changedType)
 	{
 		OnItemChanged?.Invoke(item, changedType);
 	}
