@@ -5,8 +5,8 @@ namespace ObservableCollection
 	public enum ChangedType
 	{
 		Added,
-		Updated,
 		Removed
+		Updated,
 	}
 
 	public interface IObservableCollection<T>
