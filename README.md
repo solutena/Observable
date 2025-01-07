@@ -85,32 +85,32 @@ public class Example : ISerializationCallbackReceiver
 
 ```C#
 ObservableList<int> observableList = new();
-observableList.OnItemChanged += OnItemChanged;
+observableList.OnAddedChanged += OnAddedChanged;
 
-void OnItemChanged(int item, ChangedType changedType)
+void OnAddedChanged(int item)
 {
 }
-
 ```
 이벤트를 자동완성하면, 알맞은 타입으로 구성되어
 
 타입 오류를 방지하고 편리하게 사용할 수 있습니다.
 
 ## 이벤트
-컬렉션이 변경되면 두가지 이벤트가 호출됩니다.
+컬렉션이 변경되면 이벤트가 호출됩니다.
 
-`OnItemChanged` : 변경된 값과, 변경 타입을 전달합니다.
+`OnAddedChanged` : 추가된 요소를 전달합니다.
+
+`OnRemovedChanged` : 삭제된 요소를 전달합니다.
+
+`OnUpdatedChanged` : 변경된 요소를 전달합니다. (ObservableList, ObservableDictionary)
 
 `OnCollectionChanged` : 변경된 컬렉션을 전달합니다.
 
 ## 함수
-`TriggerItemChanged(T item, ChangedType changedType)` : OnItemChanged 이벤트를 강제로 호출합니다.  
+`TriggerAddedChanged(T item)` : OnAddedChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerRemovedChanged(T item)` : OnRemovedChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerUpdatedChanged(T item)` : OnUpdatedChanged 이벤트를 강제로 호출합니다.  
 
 `TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
-
-## 변경 타입
-`Added` : 추가
-
-`Removed` : 제거
-
-`Updated` : 변경
