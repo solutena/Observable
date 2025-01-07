@@ -4,17 +4,14 @@ using System.Collections.Generic;
 
 public class ObservableList<T> : IList<T>, IObservableCollection<T>
 {
-	private readonly IList<T> _list;
+	private readonly List<T> _list;
 
-	public ObservableList() => _list = new List<T>();
-	public ObservableList(IList<T> list)
-	{
+	public ObservableList() =>
+		_list = new List<T>();
+	public ObservableList(List<T> list) =>
 		_list = list ?? throw new ArgumentNullException(nameof(list));
-	}
-	public ObservableList(IEnumerable<T> collection)
-	{
-		_list = new ObservableList<T>(collection);
-	}
+	public ObservableList(IEnumerable<T> collection) =>
+		_list = new List<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
 
 	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
@@ -94,10 +91,17 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	}
 
 	public int Count => _list.Count;
-	public bool IsReadOnly => _list.IsReadOnly;
+	public bool IsReadOnly => false;
 	public bool Contains(T item) => _list.Contains(item);
 	public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
 	public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
 	public int IndexOf(T item) => _list.IndexOf(item);
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+	public static implicit operator List<T>(ObservableList<T> observable)
+	{
+		if (observable == null)
+			throw new ArgumentNullException(nameof(observable));
+		return observable._list;
+	}
 }

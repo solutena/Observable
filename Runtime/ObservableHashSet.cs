@@ -6,17 +6,12 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 {
 	private readonly HashSet<T> _hashSet;
 
-	public ObservableHashSet() => _hashSet = new HashSet<T>();
-	public ObservableHashSet(HashSet<T> hashSet)
-	{
+	public ObservableHashSet() =>
+		_hashSet = new HashSet<T>();
+	public ObservableHashSet(HashSet<T> hashSet) =>
 		_hashSet = hashSet ?? throw new ArgumentNullException(nameof(hashSet));
-	}
-	public ObservableHashSet(IEnumerable<T> collection)
-	{
-		if (collection == null)
-			throw new ArgumentNullException(nameof(collection));
-		_hashSet = new HashSet<T>(collection);
-	}
+	public ObservableHashSet(IEnumerable<T> collection) =>
+		_hashSet = new HashSet<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
 
 	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
@@ -66,4 +61,11 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 	public void CopyTo(T[] array, int arrayIndex) => _hashSet.CopyTo(array, arrayIndex);
 	public IEnumerator<T> GetEnumerator() => _hashSet.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _hashSet.GetEnumerator();
+
+	public static implicit operator HashSet<T>(ObservableHashSet<T> observable)
+	{
+		if (observable == null)
+			throw new ArgumentNullException(nameof(observable));
+		return observable._hashSet;
+	}
 }

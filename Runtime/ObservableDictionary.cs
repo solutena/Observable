@@ -7,13 +7,10 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 {
 	private readonly Dictionary<TKey, TValue> _dictionary;
 
-	public ObservableDictionary() => _dictionary = new Dictionary<TKey, TValue>();
-	public ObservableDictionary(IDictionary<TKey, TValue> dictionary)
-	{
-		if (dictionary == null)
-			throw new ArgumentNullException(nameof(dictionary));
-		_dictionary = new Dictionary<TKey, TValue>(dictionary);
-	}
+	public ObservableDictionary() =>
+		_dictionary = new Dictionary<TKey, TValue>();
+	public ObservableDictionary(Dictionary<TKey, TValue> dictionary) =>
+		_dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
 
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnRemovedChanged;
@@ -88,4 +85,11 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 	public ICollection<TValue> Values => _dictionary.Values;
 	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
+
+	public static implicit operator Dictionary<TKey, TValue>(ObservableDictionary<TKey, TValue> observable)
+	{
+		if (observable == null)
+			throw new ArgumentNullException(nameof(observable));
+		return observable._dictionary;
+	}
 }
