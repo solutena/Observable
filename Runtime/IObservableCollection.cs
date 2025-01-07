@@ -1,23 +1,15 @@
 using System.Collections.Generic;
 
-namespace ObservableCollection
+public interface IObservableCollection<T>
 {
-	public enum ChangedType
-	{
-		Added,
-		Removed,
-		Updated
-	}
+	public delegate void OnItemChangedHandler(T item);
+	public delegate void OnCollectionChangedHandler(ICollection<T> collection);
 
-	public interface IObservableCollection<T>
-	{
-		public delegate void OnItemChangedHandler(T item, ChangedType changedType);
-		public delegate void OnCollectionChangedHandler(ICollection<T> collection);
+	public event OnItemChangedHandler OnAddedChanged;
+	public event OnItemChangedHandler OnRemovedChanged;
+	public event OnCollectionChangedHandler OnCollectionChanged;
 
-		public event OnItemChangedHandler OnItemChanged;
-		public event OnCollectionChangedHandler OnCollectionChanged;
-
-		public void TriggerItemChanged(T item, ChangedType changedType);
-		public void TriggerCollectionChanged();
-	}
+	public void TriggerAddedChanged(T item);
+	public void TriggerRemovedChanged(T item);
+	public void TriggerCollectionChanged();
 }

@@ -2,15 +2,11 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using ObservableCollection;
 
 public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IObservableCollection<KeyValuePair<TKey, TValue>>
 {
 	private readonly Dictionary<TKey, TValue> _dictionary;
 
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnItemChanged;
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnCollectionChangedHandler OnCollectionChanged;
-	
 	public ObservableDictionary() => _dictionary = new Dictionary<TKey, TValue>();
 	public ObservableDictionary(IDictionary<TKey, TValue> dictionary)
 	{
@@ -18,6 +14,16 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 			throw new ArgumentNullException(nameof(dictionary));
 		_dictionary = new Dictionary<TKey, TValue>(dictionary);
 	}
+
+	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnAddedChanged;
+	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnRemovedChanged;
+	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnUpdatedChanged;
+	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnCollectionChangedHandler OnCollectionChanged;
+
+	public void TriggerAddedChanged(KeyValuePair<TKey, TValue> item) => OnAddedChanged?.Invoke(item);
+	public void TriggerRemovedChanged(KeyValuePair<TKey, TValue> item) => OnRemovedChanged?.Invoke(item);
+	public void TriggerUpdatedChanged(KeyValuePair<TKey, TValue> item) => OnUpdatedChanged?.Invoke(item);
+	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_dictionary);
 
 	public TValue this[TKey key]
 	{
@@ -28,12 +34,12 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 			if (_dictionary.ContainsKey(key))
 			{
 				_dictionary[key] = value;
-				TriggerItemChanged(pair, ChangedType.Updated);
+				TriggerUpdatedChanged(pair);
 			}
 			else
 			{
 				_dictionary[key] = value;
-				TriggerItemChanged(pair, ChangedType.Added);
+				TriggerAddedChanged(pair);
 			}
 			TriggerCollectionChanged();
 		}
@@ -43,7 +49,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 	{
 		_dictionary.Add(key, value);
 		var pair = new KeyValuePair<TKey, TValue>(key, value);
-		TriggerItemChanged(pair, ChangedType.Added);
+		TriggerAddedChanged(pair);
 		TriggerCollectionChanged();
 	}
 
@@ -52,7 +58,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 		if (_dictionary.Remove(key, out var value))
 		{
 			var pair = new KeyValuePair<TKey, TValue>(key, value);
-			TriggerItemChanged(pair, ChangedType.Removed);
+			TriggerRemovedChanged(pair);
 			TriggerCollectionChanged();
 			return true;
 		}
@@ -66,18 +72,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 		var prevDic = new Dictionary<TKey, TValue>(_dictionary);
 		_dictionary.Clear();
 		foreach (var item in prevDic)
-			TriggerItemChanged(item, ChangedType.Removed);
+			TriggerRemovedChanged(item);
 		TriggerCollectionChanged();
-	}
-
-	public void TriggerItemChanged(KeyValuePair<TKey, TValue> item, ChangedType changedType)
-	{
-		OnItemChanged?.Invoke(item, changedType);
-	}
-
-	public void TriggerCollectionChanged()
-	{
-		OnCollectionChanged?.Invoke(_dictionary);
 	}
 
 	public int Count => _dictionary.Count;

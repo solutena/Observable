@@ -1,14 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ObservableCollection;
 
 public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 {
 	private readonly HashSet<T> _hashSet;
-
-	public event IObservableCollection<T>.OnItemChangedHandler OnItemChanged;
-	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
 	public ObservableHashSet(HashSet<T> hashSet)
@@ -22,12 +18,20 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 		_hashSet = new HashSet<T>(collection);
 	}
 
+	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
+	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
+	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
+
+	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
+	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
+	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_hashSet);
+
 	void ICollection<T>.Add(T item) => Add(item);
 	public bool Add(T item)
 	{
 		if (_hashSet.Add(item))
 		{
-			TriggerItemChanged(item, ChangedType.Added);
+			TriggerAddedChanged(item);
 			TriggerCollectionChanged();
 			return true;
 		}
@@ -38,7 +42,7 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 	{
 		if (_hashSet.Remove(item))
 		{
-			TriggerItemChanged(item, ChangedType.Removed);
+			TriggerRemovedChanged(item);
 			TriggerCollectionChanged();
 			return true;
 		}
@@ -52,18 +56,8 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 		var prevList = new List<T>(_hashSet);
 		_hashSet.Clear();
 		foreach (var item in prevList)
-			TriggerItemChanged(item, ChangedType.Removed);
+			TriggerRemovedChanged(item);
 		TriggerCollectionChanged();
-	}
-
-	public void TriggerItemChanged(T item, ChangedType changedType)
-	{
-		OnItemChanged?.Invoke(item, changedType);
-	}
-
-	public void TriggerCollectionChanged()
-	{
-		OnCollectionChanged?.Invoke(_hashSet);
 	}
 
 	public int Count => _hashSet.Count;

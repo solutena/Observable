@@ -1,14 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ObservableCollection;
 
 public class ObservableList<T> : IList<T>, IObservableCollection<T>
 {
 	private readonly IList<T> _list;
-
-	public event IObservableCollection<T>.OnItemChangedHandler OnItemChanged;
-	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableList() => _list = new List<T>();
 	public ObservableList(IList<T> list)
@@ -20,6 +16,16 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		_list = new ObservableList<T>(collection);
 	}
 
+	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
+	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
+	public event IObservableCollection<T>.OnItemChangedHandler OnUpdatedChanged;
+	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
+
+	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
+	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
+	public void TriggerUpdatedChanged(T item) => OnUpdatedChanged?.Invoke(item);
+	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_list);
+
 	public T this[int index]
 	{
 		get => _list[index];
@@ -28,7 +34,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 			if (_list[index].Equals(value))
 				return;
 			_list[index] = value;
-			TriggerItemChanged(value, ChangedType.Updated);
+			TriggerUpdatedChanged(value);
 			TriggerCollectionChanged();
 		}
 	}
@@ -36,7 +42,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	public void Add(T item)
 	{
 		_list.Add(item);
-		TriggerItemChanged(item, ChangedType.Added);
+		TriggerAddedChanged(item);
 		TriggerCollectionChanged();
 	}
 
@@ -45,7 +51,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		foreach (var item in items)
 		{
 			_list.Add(item);
-			TriggerItemChanged(item, ChangedType.Added);
+			TriggerAddedChanged(item);
 		}
 		TriggerCollectionChanged();
 	}
@@ -53,7 +59,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	public void Insert(int index, T item)
 	{
 		_list.Insert(index, item);
-		TriggerItemChanged(item, ChangedType.Added);
+		TriggerAddedChanged(item);
 		TriggerCollectionChanged();
 	}
 
@@ -62,7 +68,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		bool isRemoved = _list.Remove(item);
 		if (isRemoved)
 		{
-			TriggerItemChanged(item, ChangedType.Removed);
+			TriggerRemovedChanged(item);
 			TriggerCollectionChanged();
 		}
 		return isRemoved;
@@ -72,7 +78,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	{
 		T item = _list[index];
 		_list.RemoveAt(index);
-		TriggerItemChanged(item, ChangedType.Removed);
+		TriggerRemovedChanged(item);
 		TriggerCollectionChanged();
 	}
 
@@ -83,18 +89,8 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		var prevList = new List<T>(_list);
 		_list.Clear();
 		foreach (var item in prevList)
-			TriggerItemChanged(item, ChangedType.Removed);
+			TriggerRemovedChanged(item);
 		TriggerCollectionChanged();
-	}
-
-	public void TriggerItemChanged(T item, ChangedType changedType)
-	{
-		OnItemChanged?.Invoke(item, changedType);
-	}
-
-	public void TriggerCollectionChanged()
-	{
-		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public int Count => _list.Count;
