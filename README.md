@@ -80,6 +80,7 @@ o.Value = 20; // 출력: Value changed from 10 to 20
 
 `TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
 
+`Initialize` : 이벤트를 호출하지 않고 컬렉션을 새로 덮어씁니다.
 
 ### 암시적 변환
 컬렉션을 해당 타입으로 암시적으로 변환합니다.
