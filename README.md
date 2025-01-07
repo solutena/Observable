@@ -37,16 +37,15 @@ int i = o;
 ## 사용법
 ### 예제
 ```C#
-var observable = new Observable<int>(10);
+var o = new Observable<int>(10);
 
 //구독
-observable.OnChanged += (prev, current) =>
+o.OnChanged += (prev, current) =>
 {
     Console.WriteLine($"Value changed from {prev} to {current}");
 };
 
-//구독된 이벤트 실행
-observable.Value = 20; // 출력: Value changed from 10 to 20
+o.Value = 20; // 출력: Value changed from 10 to 20
 ```
 
 ### 직렬화 데이터
@@ -84,8 +83,8 @@ public class Example : ISerializationCallbackReceiver
 지원되는 컬렉션입니다.
 
 ```C#
-ObservableList<int> observableList = new();
-observableList.OnAddedChanged += OnAddedChanged;
+ObservableList<int> o = new();
+o.OnAddedChanged += OnAddedChanged;
 
 void OnAddedChanged(int item)
 {
@@ -114,3 +113,11 @@ void OnAddedChanged(int item)
 `TriggerUpdatedChanged(T item)` : OnUpdatedChanged 이벤트를 강제로 호출합니다.  
 
 `TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
+
+
+## 암시적 변환
+컬렉션을 해당 타입으로 암시적으로 변환합니다.
+```C#
+ObservableList<int> o = new();
+List<int> l = o;
+```
