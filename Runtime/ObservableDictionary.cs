@@ -2,16 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IObservable<KeyValuePair<TKey, TValue>>
 {
 	private readonly Dictionary<TKey, TValue> _dictionary;
 
-	public delegate void OnItemChangedHandler(TKey key, TValue value, ObservableListChangedType changedType);
-	public delegate void OnCollectionChangedHandler(IDictionary<TKey, TValue> dictionary);
-
-	public event OnItemChangedHandler OnItemChanged;
-	public event OnCollectionChangedHandler OnCollectionChanged;
+	public event IObservable<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnItemChanged;
+	public event IObservable<KeyValuePair<TKey, TValue>>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableDictionary() => _dictionary = new Dictionary<TKey, TValue>();
 	public ObservableDictionary(IDictionary<TKey, TValue> dictionary)
@@ -26,15 +24,16 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 		get => _dictionary[key];
 		set
 		{
+			var pair = new KeyValuePair<TKey, TValue>(key, value);
 			if (_dictionary.ContainsKey(key))
 			{
 				_dictionary[key] = value;
-				OnItemChanged?.Invoke(key, value, ObservableListChangedType.Updated);
+				OnItemChanged?.Invoke(pair, ObservableListChangedType.Updated);
 			}
 			else
 			{
 				_dictionary[key] = value;
-				OnItemChanged?.Invoke(key, value, ObservableListChangedType.Added);
+				OnItemChanged?.Invoke(pair, ObservableListChangedType.Added);
 			}
 			OnCollectionChanged?.Invoke(_dictionary);
 		}
@@ -43,7 +42,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 	public void Add(TKey key, TValue value)
 	{
 		_dictionary.Add(key, value);
-		OnItemChanged?.Invoke(key, value, ObservableListChangedType.Added);
+		var pair = new KeyValuePair<TKey, TValue>(key, value);
+		OnItemChanged?.Invoke(pair, ObservableListChangedType.Added);
 		OnCollectionChanged?.Invoke(_dictionary);
 	}
 
@@ -51,7 +51,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 	{
 		if (_dictionary.Remove(key, out var value))
 		{
-			OnItemChanged?.Invoke(key, value, ObservableListChangedType.Removed);
+			var pair = new KeyValuePair<TKey, TValue>(key, value);
+			OnItemChanged?.Invoke(pair, ObservableListChangedType.Removed);
 			OnCollectionChanged?.Invoke(_dictionary);
 			return true;
 		}
@@ -65,7 +66,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 		var prevDic = new Dictionary<TKey, TValue>(_dictionary);
 		_dictionary.Clear();
 		foreach (var item in prevDic)
-			OnItemChanged?.Invoke(item.Key, item.Value, ObservableListChangedType.Removed);
+			OnItemChanged?.Invoke(item, ObservableListChangedType.Removed);
 		OnCollectionChanged?.Invoke(_dictionary);
 	}
 

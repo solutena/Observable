@@ -1,17 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
-public class ObservableList<T> : IList<T>
+public class ObservableList<T> : IList<T>, IObservable<T>
 {
 	private readonly IList<T> _list;
 
-	public delegate void OnItemChangedHandler(T item, ObservableListChangedType changedType);
-	public delegate void OnCollectionChangedHandler(ICollection<T> collection);
-
-	public event OnItemChangedHandler OnItemChanged;
-	public event OnCollectionChangedHandler OnCollectionChanged;
+	public event IObservable<T>.OnItemChangedHandler OnItemChanged;
+	public event IObservable<T>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableList() => _list = new List<T>();
 	public ObservableList(IList<T> list)

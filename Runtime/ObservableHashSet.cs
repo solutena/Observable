@@ -3,15 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class ObservableHashSet<T> : ICollection<T>
+public class ObservableHashSet<T> : ICollection<T>, IObservable<T>
 {
 	private readonly HashSet<T> _hashSet;
 
-	public delegate void OnItemChangedHandler(T item, ObservableListChangedType changedType);
-	public delegate void OnCollectionChangedHandler(ICollection<T> collection);
-
-	public event OnItemChangedHandler OnItemChanged;
-	public event OnCollectionChangedHandler OnCollectionChanged;
+	public event IObservable<T>.OnItemChangedHandler OnItemChanged;
+	public event IObservable<T>.OnCollectionChangedHandler OnCollectionChanged;
 
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
 	public ObservableHashSet(HashSet<T> hashSet)
