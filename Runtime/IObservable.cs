@@ -14,4 +14,7 @@ public interface IObservable<T>
 
 	public event OnItemChangedHandler OnItemChanged;
 	public event OnCollectionChangedHandler OnCollectionChanged;
+
+	public void TriggerItemChanged(T item, ObservableListChangedType changedType);
+	public void TriggerCollectionChanged();
 }

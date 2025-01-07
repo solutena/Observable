@@ -27,29 +27,33 @@ public class ObservableList<T> : IList<T>, IObservable<T>
 			if (_list[index].Equals(value))
 				return;
 			_list[index] = value;
-			OnItemChanged?.Invoke(value, ObservableListChangedType.Updated);
-			OnCollectionChanged?.Invoke(_list);
+			TriggerItemChanged(value, ObservableListChangedType.Updated);
+			TriggerCollectionChanged();
 		}
 	}
 
 	public void Add(T item)
 	{
 		_list.Add(item);
-		OnItemChanged?.Invoke(item, ObservableListChangedType.Added);
-		OnCollectionChanged?.Invoke(_list);
+		TriggerItemChanged(item, ObservableListChangedType.Added);
+		TriggerCollectionChanged();
 	}
 
 	public void AddRange(IEnumerable<T> items)
 	{
 		foreach (var item in items)
-			Add(item);
+		{
+			_list.Add(item);
+			TriggerItemChanged(item, ObservableListChangedType.Added);
+		}
+		TriggerCollectionChanged();
 	}
 
 	public void Insert(int index, T item)
 	{
 		_list.Insert(index, item);
-		OnItemChanged?.Invoke(item, ObservableListChangedType.Added);
-		OnCollectionChanged?.Invoke(_list);
+		TriggerItemChanged(item, ObservableListChangedType.Added);
+		TriggerCollectionChanged();
 	}
 
 	public bool Remove(T item)
@@ -57,8 +61,8 @@ public class ObservableList<T> : IList<T>, IObservable<T>
 		bool isRemoved = _list.Remove(item);
 		if (isRemoved)
 		{
-			OnItemChanged?.Invoke(item, ObservableListChangedType.Removed);
-			OnCollectionChanged?.Invoke(_list);
+			TriggerItemChanged(item, ObservableListChangedType.Removed);
+			TriggerCollectionChanged();
 		}
 		return isRemoved;
 	}
@@ -67,8 +71,8 @@ public class ObservableList<T> : IList<T>, IObservable<T>
 	{
 		T item = _list[index];
 		_list.RemoveAt(index);
-		OnItemChanged?.Invoke(item, ObservableListChangedType.Removed);
-		OnCollectionChanged?.Invoke(_list);
+		TriggerItemChanged(item, ObservableListChangedType.Removed);
+		TriggerCollectionChanged();
 	}
 
 	public void Clear()
@@ -78,7 +82,17 @@ public class ObservableList<T> : IList<T>, IObservable<T>
 		var prevList = new List<T>(_list);
 		_list.Clear();
 		foreach (var item in prevList)
-			OnItemChanged?.Invoke(item, ObservableListChangedType.Removed);
+			TriggerItemChanged(item, ObservableListChangedType.Removed);
+		TriggerCollectionChanged();
+	}
+
+	public void TriggerItemChanged(T item, ObservableListChangedType changedType)
+	{
+		OnItemChanged?.Invoke(item, changedType);
+	}
+
+	public void TriggerCollectionChanged()
+	{
 		OnCollectionChanged?.Invoke(_list);
 	}
 
