@@ -6,7 +6,7 @@ namespace ObservableCollection
 	{
 		Added,
 		Removed,
-		Updated,
+		Updated
 	}
 
 	public interface IObservableCollection<T>
