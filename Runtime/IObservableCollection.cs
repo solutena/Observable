@@ -5,7 +5,7 @@ namespace ObservableCollection
 	public enum ChangedType
 	{
 		Added,
-		Removed
+		Removed,
 		Updated,
 	}
 
