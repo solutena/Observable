@@ -2,10 +2,13 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IObservableCollection<KeyValuePair<TKey, TValue>>
+public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IObservableCollection<KeyValuePair<TKey, TValue>>, ISerializationCallbackReceiver
 {
-	private readonly Dictionary<TKey, TValue> _dictionary;
+	[SerializeField] private List<TKey> _keys;
+	[SerializeField] private List<TValue> _values;
+	private Dictionary<TKey, TValue> _dictionary;
 
 	public ObservableDictionary() =>
 		_dictionary = new Dictionary<TKey, TValue>();
@@ -85,7 +88,17 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 	public ICollection<TValue> Values => _dictionary.Values;
 	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
-
+	public void OnAfterDeserialize()
+	{
+		_dictionary = new Dictionary<TKey, TValue>();
+		for (int i = 0; i < _keys.Count; i++)
+			_dictionary.Add(_keys[i], _values[i]);
+	}
+	public void OnBeforeSerialize()
+	{
+		_keys = new List<TKey>(_dictionary.Keys);
+		_values = new List<TValue>(_dictionary.Values);
+	}
 	public static implicit operator Dictionary<TKey, TValue>(ObservableDictionary<TKey, TValue> observable)
 	{
 		if (observable == null)

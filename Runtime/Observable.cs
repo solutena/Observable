@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Observable<T>
 {
-	private T _value;
+	[SerializeField] T _value;
 
 	public delegate void OnChangedHandler(T prev, T current);
 	public event OnChangedHandler OnChanged;

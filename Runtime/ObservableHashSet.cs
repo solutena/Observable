@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
+public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, ISerializationCallbackReceiver
 {
-	private readonly HashSet<T> _hashSet;
+	[SerializeField] private List<T> _serialized;
+	private HashSet<T> _hashSet;
 
 	public ObservableHashSet() =>
 		_hashSet = new HashSet<T>();
@@ -61,7 +63,8 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>
 	public void CopyTo(T[] array, int arrayIndex) => _hashSet.CopyTo(array, arrayIndex);
 	public IEnumerator<T> GetEnumerator() => _hashSet.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _hashSet.GetEnumerator();
-
+	public void OnAfterDeserialize() => _hashSet = new(_serialized);
+	public void OnBeforeSerialize() => _serialized = new(_hashSet);
 	public static implicit operator HashSet<T>(ObservableHashSet<T> observable)
 	{
 		if (observable == null)

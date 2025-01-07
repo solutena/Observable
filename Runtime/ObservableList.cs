@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ObservableList<T> : IList<T>, IObservableCollection<T>
 {
-	private readonly List<T> _list;
+	[SerializeField] private List<T> _list;
 
 	public ObservableList() =>
 		_list = new List<T>();
