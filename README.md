@@ -74,7 +74,7 @@ public class Example : ISerializationCallbackReceiver
 ```
 직렬화 데이터에서 사용하는 예제입니다.
 
-# 컬렉션
+# IObservableCollection
 `ObservableDictionary<TKey, TValue>`
 
 `ObservableHashSet<T>`
@@ -89,6 +89,11 @@ public class Example : ISerializationCallbackReceiver
 `OnItemChanged` : 변경된 값과, 변경 타입을 전달합니다.
 
 `OnCollectionChanged` : 변경된 컬렉션을 전달합니다.
+
+## 함수
+`TriggerItemChanged(T item, ChangedType changedType)` : OnItemChanged 이벤트를 강제로 호출합니다.  
+
+`TriggerCollectionChanged()` : OnCollectionChanged 이벤트를 강제로 호출합니다.
 
 ## 변경 타입
 `Added` : 추가
