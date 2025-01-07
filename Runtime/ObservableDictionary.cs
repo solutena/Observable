@@ -10,16 +10,15 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 	[SerializeField] private List<TValue> _values;
 	private Dictionary<TKey, TValue> _dictionary;
 
-	public ObservableDictionary() =>
-		_dictionary = new Dictionary<TKey, TValue>();
-	public ObservableDictionary(Dictionary<TKey, TValue> dictionary) =>
-		_dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+	public ObservableDictionary() => _dictionary = new Dictionary<TKey, TValue>();
+	public ObservableDictionary(Dictionary<TKey, TValue> dictionary) => Initialize(dictionary);
 
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnRemovedChanged;
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnUpdatedChanged;
 	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnCollectionChangedHandler OnCollectionChanged;
 
+	public void Initialize(Dictionary<TKey, TValue> dictionary) => _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
 	public void TriggerAddedChanged(KeyValuePair<TKey, TValue> item) => OnAddedChanged?.Invoke(item);
 	public void TriggerRemovedChanged(KeyValuePair<TKey, TValue> item) => OnRemovedChanged?.Invoke(item);
 	public void TriggerUpdatedChanged(KeyValuePair<TKey, TValue> item) => OnUpdatedChanged?.Invoke(item);
