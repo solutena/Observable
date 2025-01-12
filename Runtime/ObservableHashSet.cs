@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, ISerializationCallbackReceiver
 {
 	[SerializeField] private List<T> _serialized;

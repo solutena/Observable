@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class ObservableList<T> : IList<T>, IObservableCollection<T>
 {
 	[SerializeField] private List<T> _list;
