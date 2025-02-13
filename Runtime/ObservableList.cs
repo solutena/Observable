@@ -13,13 +13,15 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 
 	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
-	public event IObservableCollection<T>.OnItemChangedHandler OnUpdatedChanged;
 	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
+	
+	public delegate void OnItemUpdatedHandler(T item, int index);
+	public event OnItemUpdatedHandler OnUpdatedChanged;
 
 	public void Initialize(IEnumerable<T> collection) => _list = new List<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
 	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
 	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
-	public void TriggerUpdatedChanged(T item) => OnUpdatedChanged?.Invoke(item);
+	public void TriggerUpdatedChanged(T item, int index) => OnUpdatedChanged?.Invoke(item, index);
 	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_list);
 
 	public T this[int index]
@@ -30,7 +32,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 			if (_list[index].Equals(value))
 				return;
 			_list[index] = value;
-			TriggerUpdatedChanged(value);
+			TriggerUpdatedChanged(value, index);
 			TriggerCollectionChanged();
 		}
 	}

@@ -10,14 +10,12 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, IS
 	private HashSet<T> _hashSet;
 
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
-	public ObservableHashSet(HashSet<T> hashSet) => Initialize(hashSet);
 	public ObservableHashSet(IEnumerable<T> collection) => Initialize(collection);
 
 	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
 	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
 	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
 
-	public void Initialize(HashSet<T> hashSet) => _hashSet = hashSet ?? throw new ArgumentNullException(nameof(hashSet));
 	public void Initialize(IEnumerable<T> collection) => _hashSet = new HashSet<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
 	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
 	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
