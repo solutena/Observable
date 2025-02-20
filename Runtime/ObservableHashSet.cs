@@ -26,8 +26,8 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, IS
 	{
 		if (_hashSet.Add(item))
 		{
-			TriggerAddedChanged(item);
-			TriggerCollectionChanged();
+			OnAddedChanged?.Invoke(item);
+			OnCollectionChanged?.Invoke(_hashSet);
 			return true;
 		}
 		return false;
@@ -37,8 +37,8 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, IS
 	{
 		if (_hashSet.Remove(item))
 		{
-			TriggerRemovedChanged(item);
-			TriggerCollectionChanged();
+			OnRemovedChanged?.Invoke(item);
+			OnCollectionChanged?.Invoke(_hashSet);
 			return true;
 		}
 		return false;
@@ -51,8 +51,8 @@ public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, IS
 		var prevList = new List<T>(_hashSet);
 		_hashSet.Clear();
 		foreach (var item in prevList)
-			TriggerRemovedChanged(item);
-		TriggerCollectionChanged();
+			OnRemovedChanged?.Invoke(item);
+		OnCollectionChanged?.Invoke(_hashSet);
 	}
 
 	public int Count => _hashSet.Count;

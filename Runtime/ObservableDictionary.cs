@@ -34,14 +34,14 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 			if (_dictionary.ContainsKey(key))
 			{
 				_dictionary[key] = value;
-				TriggerUpdatedChanged(pair);
+				OnUpdatedChanged?.Invoke(pair);
 			}
 			else
 			{
 				_dictionary[key] = value;
-				TriggerAddedChanged(pair);
+				OnAddedChanged?.Invoke(pair);
 			}
-			TriggerCollectionChanged();
+			OnCollectionChanged?.Invoke(_dictionary);
 		}
 	}
 
@@ -49,8 +49,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 	{
 		_dictionary.Add(key, value);
 		var pair = new KeyValuePair<TKey, TValue>(key, value);
-		TriggerAddedChanged(pair);
-		TriggerCollectionChanged();
+		OnAddedChanged?.Invoke(pair);
+		OnCollectionChanged?.Invoke(_dictionary);
 	}
 
 	public bool Remove(TKey key)
@@ -58,8 +58,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 		if (_dictionary.Remove(key, out var value))
 		{
 			var pair = new KeyValuePair<TKey, TValue>(key, value);
-			TriggerRemovedChanged(pair);
-			TriggerCollectionChanged();
+			OnRemovedChanged?.Invoke(pair);
+			OnCollectionChanged?.Invoke(_dictionary);
 			return true;
 		}
 		return false;
@@ -71,9 +71,9 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IOb
 			return;
 		var prevDic = new Dictionary<TKey, TValue>(_dictionary);
 		_dictionary.Clear();
-		foreach (var item in prevDic)
-			TriggerRemovedChanged(item);
-		TriggerCollectionChanged();
+		foreach (var pair in prevDic)
+			OnRemovedChanged?.Invoke(pair);
+		OnCollectionChanged?.Invoke(_dictionary);
 	}
 
 	public int Count => _dictionary.Count;

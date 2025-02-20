@@ -21,7 +21,7 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	public void Initialize(IEnumerable<T> collection) => _list = new List<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
 	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
 	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
-	public void TriggerUpdatedChanged(T item, int index) => OnUpdatedChanged?.Invoke(item, index);
+	public void TriggerUpdatedChanged(T item) => OnUpdatedChanged?.Invoke(item, _list.IndexOf(item));
 	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_list);
 
 	public T this[int index]
@@ -32,16 +32,16 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 			if (_list[index].Equals(value))
 				return;
 			_list[index] = value;
-			TriggerUpdatedChanged(value, index);
-			TriggerCollectionChanged();
+			OnUpdatedChanged?.Invoke(value, index);
+			OnCollectionChanged?.Invoke(_list);
 		}
 	}
 
 	public void Add(T item)
 	{
 		_list.Add(item);
-		TriggerAddedChanged(item);
-		TriggerCollectionChanged();
+		OnAddedChanged?.Invoke(item);
+		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public void AddRange(IEnumerable<T> items)
@@ -49,16 +49,16 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		foreach (var item in items)
 		{
 			_list.Add(item);
-			TriggerAddedChanged(item);
+			OnAddedChanged?.Invoke(item);
 		}
-		TriggerCollectionChanged();
+		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public void Insert(int index, T item)
 	{
 		_list.Insert(index, item);
-		TriggerAddedChanged(item);
-		TriggerCollectionChanged();
+		OnAddedChanged?.Invoke(item);
+		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public bool Remove(T item)
@@ -66,8 +66,8 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		bool isRemoved = _list.Remove(item);
 		if (isRemoved)
 		{
-			TriggerRemovedChanged(item);
-			TriggerCollectionChanged();
+			OnRemovedChanged?.Invoke(item);
+			OnCollectionChanged?.Invoke(_list);
 		}
 		return isRemoved;
 	}
@@ -76,8 +76,8 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 	{
 		T item = _list[index];
 		_list.RemoveAt(index);
-		TriggerRemovedChanged(item);
-		TriggerCollectionChanged();
+		OnRemovedChanged?.Invoke(item);
+		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public void Clear()
@@ -87,8 +87,8 @@ public class ObservableList<T> : IList<T>, IObservableCollection<T>
 		var prevList = new List<T>(_list);
 		_list.Clear();
 		foreach (var item in prevList)
-			TriggerRemovedChanged(item);
-		TriggerCollectionChanged();
+			OnRemovedChanged?.Invoke(item);
+		OnCollectionChanged?.Invoke(_list);
 	}
 
 	public int Count => _list.Count;
