@@ -27,6 +27,8 @@ public class Observable<T>
 		}
 	}
 
+	public void TriggerChanged(T prev, T current) => OnChanged?.Invoke(prev, current);
+ 
 	public static implicit operator T(Observable<T> observable)
 	{
 		return observable.Value;
