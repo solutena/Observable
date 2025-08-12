@@ -22,7 +22,7 @@ public class Observable<T>
 			{
 				var prev = _value;
 				_value = value;
-				OnChanged(prev, _value);
+				OnChanged?.Invoke(prev, _value);
 			}
 		}
 	}
