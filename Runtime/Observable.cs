@@ -4,44 +4,54 @@ using System.Collections.Generic;
 public class Observable<T>
 {
 	private T _value;
-	private readonly bool _ignoreNull;
+	private readonly bool _ignoreNullNotify;
 
 	public delegate void ChangedHandler(T previous, T current);
 	public delegate void CurrentChangedHandler(T current);
 
 	public event ChangedHandler OnChanged;
 	public event CurrentChangedHandler OnCurrentChanged;
-
-	public T Value => _value;
-
-	public Observable(bool ignoreNull = true)
+	
+	public T Value
 	{
-		this._ignoreNull = ignoreNull;
+		get => _value;
+		set
+		{
+			if (EqualityComparer<T>.Default.Equals(_value, value))
+				return;
+
+			if(!_ignoreNullNotify && value is null)
+			{
+				_value = value;
+				return;
+			}
+
+			var prev = _value;
+			_value = value;
+
+			OnChanged?.Invoke(prev, _value);
+			OnCurrentChanged?.Invoke(_value);
+		}
+	}
+
+	public Observable(bool ignoreNullNotify = true)
+	{
 		_value = default;
+		_ignoreNullNotify = ignoreNullNotify;
 	}
 
-	public Observable(T value, bool ignoreNull = true)
+	public Observable(T value, bool ignoreNullNotify = true)
 	{
-		this._ignoreNull = ignoreNull;
 		_value = value;
+		_ignoreNullNotify = ignoreNullNotify;
 	}
 
-	public void Set(T value, bool isNotify = true)
+	public void SetWithoutNotify(T value)
 	{
 		if (EqualityComparer<T>.Default.Equals(_value, value))
 			return;
 
-		if (_ignoreNull && value is null)
-			return;
-
-		var prev = _value;
 		_value = value;
-
-		if (!isNotify)
-			return;
-
-		OnChanged?.Invoke(prev, _value);
-		OnCurrentChanged?.Invoke(_value);
 	}
 
 	public static implicit operator T(Observable<T> observable)
