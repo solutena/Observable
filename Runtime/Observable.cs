@@ -1,36 +1,50 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-[Serializable]
 public class Observable<T>
 {
-	[SerializeField] T _value;
+	private T _value;
+	private readonly bool _ignoreNull;
 
-	public delegate void OnChangedHandler(T prev, T current);
-	public event OnChangedHandler OnChanged;
+	public event Action<T, T> OnChanged;
+	public event Action<T> OnCurrentChanged;
 
-	public Observable() => _value = default;
-	public Observable(T value) => _value = value;
+	public T Value => _value;
 
-	public T Value
+	public Observable(bool ignoreNull = true)
 	{
-		get => _value;
-		set
-		{
-			if (EqualityComparer<T>.Default.Equals(_value, value) == false)
-			{
-				var prev = _value;
-				_value = value;
-				OnChanged?.Invoke(prev, _value);
-			}
-		}
+		this._ignoreNull = ignoreNull;
+		_value = default;
 	}
 
-	public void TriggerChanged(T prev, T current) => OnChanged?.Invoke(prev, current);
+	public Observable(T value, bool ignoreNull = true)
+	{
+		this._ignoreNull = ignoreNull;
+		_value = value;
+	}
+
+	public void Set(T value, bool isNotify = true)
+	{
+		if (EqualityComparer<T>.Default.Equals(_value, value))
+			return;
+
+		if (_ignoreNull && value is null)
+			return;
+
+		var prev = _value;
+		_value = value;
+
+		if (!isNotify)
+			return;
+
+		OnChanged?.Invoke(prev, _value);
+		OnCurrentChanged?.Invoke(_value);
+	}
 
 	public static implicit operator T(Observable<T> observable)
 	{
+		if (observable == null)
+			return default;
 		return observable.Value;
 	}
 }

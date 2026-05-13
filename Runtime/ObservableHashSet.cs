@@ -1,72 +1,117 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-[Serializable]
-public class ObservableHashSet<T> : ICollection<T>, IObservableCollection<T>, ISerializationCallbackReceiver
+public class ObservableHashSet<T> : IEnumerable<T>
 {
-	[SerializeField] private List<T> _serialized;
-	private HashSet<T> _hashSet;
+	private readonly HashSet<T> _hashSet;
 
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
-	public ObservableHashSet(IEnumerable<T> collection) => Initialize(collection);
+	public ObservableHashSet(IEnumerable<T> collection) => _hashSet = new HashSet<T>(collection);
 
-	public event IObservableCollection<T>.OnItemChangedHandler OnAddedChanged;
-	public event IObservableCollection<T>.OnItemChangedHandler OnRemovedChanged;
-	public event IObservableCollection<T>.OnCollectionChangedHandler OnCollectionChanged;
+	public event Action<T> OnAdded;
+	public event Action<T> OnRemoved;
+	public event Action<IReadOnlyCollection<T>> OnCollectionChanged;
 
-	public void Initialize(IEnumerable<T> collection) => _hashSet = new HashSet<T>(collection ?? throw new ArgumentNullException(nameof(collection)));
-	public void TriggerAddedChanged(T item) => OnAddedChanged?.Invoke(item);
-	public void TriggerRemovedChanged(T item) => OnRemovedChanged?.Invoke(item);
-	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_hashSet);
+	public int Count => _hashSet.Count;
+	public bool Contains(T item) => _hashSet.Contains(item);
+	public IEnumerator<T> GetEnumerator() => _hashSet.GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator() => _hashSet.GetEnumerator();
 
-	void ICollection<T>.Add(T item) => Add(item);
-	public bool Add(T item)
+	public bool Add(T item, bool isNotify = true)
 	{
-		if (_hashSet.Add(item))
-		{
-			OnAddedChanged?.Invoke(item);
-			OnCollectionChanged?.Invoke(_hashSet);
+		if (!_hashSet.Add(item))
+			return false;
+
+		if (!isNotify)
 			return true;
-		}
-		return false;
+
+		OnAdded?.Invoke(item);
+		OnCollectionChanged?.Invoke(_hashSet);
+		return true;
 	}
 
-	public bool Remove(T item)
+	public bool Remove(T item, bool isNotify = true)
 	{
-		if (_hashSet.Remove(item))
-		{
-			OnRemovedChanged?.Invoke(item);
-			OnCollectionChanged?.Invoke(_hashSet);
+		if (!_hashSet.Remove(item))
+			return false;
+
+		if (!isNotify)
 			return true;
-		}
-		return false;
+
+		OnRemoved?.Invoke(item);
+		OnCollectionChanged?.Invoke(_hashSet);
+		return true;
 	}
 
-	public void Clear()
+	public void Clear(bool isNotify = true)
 	{
 		if (_hashSet.Count == 0)
 			return;
-		var prevList = new List<T>(_hashSet);
+
+		if (!isNotify)
+		{
+			_hashSet.Clear();
+			return;
+		}
+
+		var copy = new List<T>(_hashSet);
 		_hashSet.Clear();
-		foreach (var item in prevList)
-			OnRemovedChanged?.Invoke(item);
+
+		foreach (var item in copy)
+			OnRemoved?.Invoke(item);
 		OnCollectionChanged?.Invoke(_hashSet);
 	}
 
-	public int Count => _hashSet.Count;
-	public bool IsReadOnly => false;
-	public bool Contains(T item) => _hashSet.Contains(item);
-	public void CopyTo(T[] array, int arrayIndex) => _hashSet.CopyTo(array, arrayIndex);
-	public IEnumerator<T> GetEnumerator() => _hashSet.GetEnumerator();
-	IEnumerator IEnumerable.GetEnumerator() => _hashSet.GetEnumerator();
-	public void OnAfterDeserialize() => _hashSet = new(_serialized);
-	public void OnBeforeSerialize() => _serialized = new(_hashSet);
-	public static implicit operator HashSet<T>(ObservableHashSet<T> observable)
+	public void UnionWith(IEnumerable<T> other)
 	{
-		if (observable == null)
-			throw new ArgumentNullException(nameof(observable));
-		return observable._hashSet;
+		foreach (var item in other)
+		{
+			if (_hashSet.Add(item))
+				OnAdded?.Invoke(item);
+		}
+		OnCollectionChanged?.Invoke(_hashSet);
+	}
+
+	public void ExceptWith(IEnumerable<T> other)
+	{
+		foreach (var item in other)
+		{
+			if (_hashSet.Remove(item))
+				OnRemoved?.Invoke(item);
+		}
+		OnCollectionChanged?.Invoke(_hashSet);
+	}
+
+	public void IntersectWith(IEnumerable<T> other)
+	{
+		var toKeep = new HashSet<T>(other);
+		var removed = new List<T>();
+		foreach (var item in _hashSet)
+		{
+			if (!toKeep.Contains(item))
+				removed.Add(item);
+		}
+		foreach (var item in removed)
+		{
+			_hashSet.Remove(item);
+			OnRemoved?.Invoke(item);
+		}
+		OnCollectionChanged?.Invoke(_hashSet);
+	}
+
+	public void SymmetricExceptWith(IEnumerable<T> other)
+	{
+		foreach (var item in other)
+		{
+			if (!_hashSet.Add(item))
+			{
+				_hashSet.Remove(item);
+				OnRemoved?.Invoke(item);
+			}
+			else
+				OnAdded?.Invoke(item);
+		}
+		OnCollectionChanged?.Invoke(_hashSet);
 	}
 }

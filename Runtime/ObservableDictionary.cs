@@ -1,108 +1,115 @@
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-[Serializable]
-public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IObservableCollection<KeyValuePair<TKey, TValue>>, ISerializationCallbackReceiver
+public enum ObservableDictionaryChangeType
 {
-	[SerializeField] private List<TKey> _keys;
-	[SerializeField] private List<TValue> _values;
-	private Dictionary<TKey, TValue> _dictionary;
+	Add,
+	Update,
+	Remove,
+}
 
-	public ObservableDictionary() => _dictionary = new Dictionary<TKey, TValue>();
-	public ObservableDictionary(Dictionary<TKey, TValue> dictionary) => Initialize(dictionary);
+public readonly struct ObservableDictionaryChange<TKey, TValue>
+{
+	public readonly TKey Key;
+	public readonly TValue PreviousValue;
+	public readonly TValue CurrentValue;
+	public readonly ObservableDictionaryChangeType Type;
 
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnAddedChanged;
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnRemovedChanged;
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnItemChangedHandler OnUpdatedChanged;
-	public event IObservableCollection<KeyValuePair<TKey, TValue>>.OnCollectionChangedHandler OnCollectionChanged;
-
-	public void Initialize(Dictionary<TKey, TValue> dictionary) => _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
-	public void TriggerAddedChanged(KeyValuePair<TKey, TValue> item) => OnAddedChanged?.Invoke(item);
-	public void TriggerRemovedChanged(KeyValuePair<TKey, TValue> item) => OnRemovedChanged?.Invoke(item);
-	public void TriggerUpdatedChanged(KeyValuePair<TKey, TValue> item) => OnUpdatedChanged?.Invoke(item);
-	public void TriggerCollectionChanged() => OnCollectionChanged?.Invoke(_dictionary);
-
-	public TValue this[TKey key]
+	public ObservableDictionaryChange(TKey key, TValue previousValue, TValue currentValue, ObservableDictionaryChangeType type)
 	{
-		get => _dictionary[key];
-		set
-		{
-			var pair = new KeyValuePair<TKey, TValue>(key, value);
-			if (_dictionary.ContainsKey(key))
-			{
-				_dictionary[key] = value;
-				OnUpdatedChanged?.Invoke(pair);
-			}
-			else
-			{
-				_dictionary[key] = value;
-				OnAddedChanged?.Invoke(pair);
-			}
-			OnCollectionChanged?.Invoke(_dictionary);
-		}
+		Key = key;
+		PreviousValue = previousValue;
+		CurrentValue = currentValue;
+		Type = type;
+	}
+}
+
+public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+	private readonly Dictionary<TKey, TValue> _dict = new();
+
+	public event Action<ObservableDictionaryChange<TKey, TValue>> OnChanged;
+
+	public TValue this[TKey key] => _dict[key];
+	public int Count => _dict.Count;
+	public bool ContainsKey(TKey key) => _dict.ContainsKey(key);
+	public bool TryGetValue(TKey key, out TValue value) => _dict.TryGetValue(key, out value);
+	public Dictionary<TKey, TValue>.KeyCollection Keys => _dict.Keys;
+	public Dictionary<TKey, TValue>.ValueCollection Values => _dict.Values;
+	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dict.GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
+
+	public bool Add(TKey key, TValue value, bool isNotify = true)
+	{
+		if (_dict.ContainsKey(key))
+			return false;
+
+		_dict.Add(key, value);
+
+		if (!isNotify)
+			return true;
+
+		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, default, value, ObservableDictionaryChangeType.Add));
+		return true;
 	}
 
-	public void Add(TKey key, TValue value)
+	public bool Set(TKey key, TValue value, bool isNotify = true)
 	{
-		_dictionary.Add(key, value);
-		var pair = new KeyValuePair<TKey, TValue>(key, value);
-		OnAddedChanged?.Invoke(pair);
-		OnCollectionChanged?.Invoke(_dictionary);
-	}
-
-	public bool Remove(TKey key)
-	{
-		if (_dictionary.Remove(key, out var value))
+		if (_dict.TryGetValue(key, out TValue prevValue))
 		{
-			var pair = new KeyValuePair<TKey, TValue>(key, value);
-			OnRemovedChanged?.Invoke(pair);
-			OnCollectionChanged?.Invoke(_dictionary);
+			if (EqualityComparer<TValue>.Default.Equals(prevValue, value))
+				return false;
+
+			_dict[key] = value;
+
+			if (isNotify == false)
+				return true;
+
+			OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, prevValue, value, ObservableDictionaryChangeType.Update));
 			return true;
 		}
-		return false;
+
+		_dict.Add(key, value);
+
+		if (isNotify == false)
+			return true;
+
+		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, default, value, ObservableDictionaryChangeType.Add));
+		return true;
 	}
 
-	public void Clear()
+	public bool Remove(TKey key, bool isNotify = true)
 	{
-		if (_dictionary.Count == 0)
+		if (!_dict.TryGetValue(key, out TValue value))
+			return false;
+
+		_dict.Remove(key);
+
+		if (isNotify == false)
+			return true;
+
+		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, value, default, ObservableDictionaryChangeType.Remove));
+		return true;
+	}
+
+	public void Clear(bool isNotify = true)
+	{
+		if (_dict.Count == 0)
 			return;
-		var prevDic = new Dictionary<TKey, TValue>(_dictionary);
-		_dictionary.Clear();
-		foreach (var pair in prevDic)
-			OnRemovedChanged?.Invoke(pair);
-		OnCollectionChanged?.Invoke(_dictionary);
-	}
 
-	public int Count => _dictionary.Count;
-	public bool IsReadOnly => false;
-	public bool ContainsKey(TKey key) => _dictionary.ContainsKey(key);
-	public bool TryGetValue(TKey key, out TValue value) => _dictionary.TryGetValue(key, out value);
-	public void Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
-	public bool Remove(KeyValuePair<TKey, TValue> item) => Remove(item.Key);
-	public bool Contains(KeyValuePair<TKey, TValue> item) => _dictionary.Contains(item);
-	public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => ((IDictionary<TKey, TValue>)_dictionary).CopyTo(array, arrayIndex);
-	public ICollection<TKey> Keys => _dictionary.Keys;
-	public ICollection<TValue> Values => _dictionary.Values;
-	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
-	IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
-	public void OnAfterDeserialize()
-	{
-		_dictionary = new Dictionary<TKey, TValue>();
-		for (int i = 0; i < _keys.Count; i++)
-			_dictionary.Add(_keys[i], _values[i]);
-	}
-	public void OnBeforeSerialize()
-	{
-		_keys = new List<TKey>(_dictionary.Keys);
-		_values = new List<TValue>(_dictionary.Values);
-	}
-	public static implicit operator Dictionary<TKey, TValue>(ObservableDictionary<TKey, TValue> observable)
-	{
-		if (observable == null)
-			throw new ArgumentNullException(nameof(observable));
-		return observable._dictionary;
+		if (isNotify == false)
+		{
+			_dict.Clear();
+			return;
+		}
+
+		var buffer = new List<KeyValuePair<TKey, TValue>>(_dict);
+		_dict.Clear();
+		for (int i = 0; i < buffer.Count; i++)
+		{
+			var pair = buffer[i];
+			OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(pair.Key, pair.Value, default, ObservableDictionaryChangeType.Remove));
+		}
 	}
 }
