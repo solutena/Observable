@@ -9,10 +9,15 @@ public class ObservableList<T> : IEnumerable<T>
 	public ObservableList() => _list = new List<T>();
 	public ObservableList(IEnumerable<T> collection) => _list = new List<T>(collection);
 
-	public event Action<T> OnAdded;
-	public event Action<T> OnRemoved;
-	public event Action<int, T, T> OnReplaced;
-	public event Action<IReadOnlyList<T>> OnCollectionChanged;
+	public delegate void AddedHandler(T item);
+	public delegate void RemovedHandler(T item);
+	public delegate void ReplacedHandler(int index, T previous, T current);
+	public delegate void CollectionChangedHandler(IReadOnlyList<T> collection);
+
+	public event AddedHandler OnAdded;
+	public event RemovedHandler OnRemoved;
+	public event ReplacedHandler OnReplaced;
+	public event CollectionChangedHandler OnCollectionChanged;
 
 	public T this[int index] => _list[index];
 	public int Count => _list.Count;

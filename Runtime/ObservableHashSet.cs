@@ -9,9 +9,13 @@ public class ObservableHashSet<T> : IEnumerable<T>
 	public ObservableHashSet() => _hashSet = new HashSet<T>();
 	public ObservableHashSet(IEnumerable<T> collection) => _hashSet = new HashSet<T>(collection);
 
-	public event Action<T> OnAdded;
-	public event Action<T> OnRemoved;
-	public event Action<IReadOnlyCollection<T>> OnCollectionChanged;
+	public delegate void AddedHandler(T item);
+	public delegate void RemovedHandler(T item);
+	public delegate void CollectionChangedHandler(IReadOnlyCollection<T> collection);
+
+	public event AddedHandler OnAdded;
+	public event RemovedHandler OnRemoved;
+	public event CollectionChangedHandler OnCollectionChanged;
 
 	public int Count => _hashSet.Count;
 	public bool Contains(T item) => _hashSet.Contains(item);

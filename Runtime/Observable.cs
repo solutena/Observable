@@ -6,8 +6,11 @@ public class Observable<T>
 	private T _value;
 	private readonly bool _ignoreNull;
 
-	public event Action<T, T> OnChanged;
-	public event Action<T> OnCurrentChanged;
+	public delegate void ChangedHandler(T previous, T current);
+	public delegate void CurrentChangedHandler(T current);
+
+	public event ChangedHandler OnChanged;
+	public event CurrentChangedHandler OnCurrentChanged;
 
 	public T Value => _value;
 

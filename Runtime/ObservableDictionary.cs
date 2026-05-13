@@ -2,34 +2,35 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public enum ObservableDictionaryChangeType
-{
-	Add,
-	Update,
-	Remove,
-}
-
-public readonly struct ObservableDictionaryChange<TKey, TValue>
-{
-	public readonly TKey Key;
-	public readonly TValue PreviousValue;
-	public readonly TValue CurrentValue;
-	public readonly ObservableDictionaryChangeType Type;
-
-	public ObservableDictionaryChange(TKey key, TValue previousValue, TValue currentValue, ObservableDictionaryChangeType type)
-	{
-		Key = key;
-		PreviousValue = previousValue;
-		CurrentValue = currentValue;
-		Type = type;
-	}
-}
-
 public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
 {
+	public readonly struct Change
+	{
+		public enum Type
+		{
+			Add,
+			Update,
+			Remove,
+		}
+
+		public readonly TKey Key;
+		public readonly TValue PreviousValue;
+		public readonly TValue CurrentValue;
+		public readonly Type ChangeType;
+
+		public Change(TKey key, TValue previousValue, TValue currentValue, Type type)
+		{
+			Key = key;
+			PreviousValue = previousValue;
+			CurrentValue = currentValue;
+			ChangeType = type;
+		}
+	}
+
 	private readonly Dictionary<TKey, TValue> _dict = new();
 
-	public event Action<ObservableDictionaryChange<TKey, TValue>> OnChanged;
+	public delegate void ChangedHandler(Change change);
+	public event ChangedHandler OnChanged;
 
 	public TValue this[TKey key] => _dict[key];
 	public int Count => _dict.Count;
@@ -50,7 +51,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 		if (!isNotify)
 			return true;
 
-		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, default, value, ObservableDictionaryChangeType.Add));
+		OnChanged?.Invoke(new Change(key, default, value, Change.Type.Add));
 		return true;
 	}
 
@@ -66,7 +67,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 			if (isNotify == false)
 				return true;
 
-			OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, prevValue, value, ObservableDictionaryChangeType.Update));
+			OnChanged?.Invoke(new Change(key, prevValue, value, Change.Type.Update));
 			return true;
 		}
 
@@ -75,7 +76,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 		if (isNotify == false)
 			return true;
 
-		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, default, value, ObservableDictionaryChangeType.Add));
+		OnChanged?.Invoke(new Change(key, default, value, Change.Type.Add));
 		return true;
 	}
 
@@ -89,7 +90,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 		if (isNotify == false)
 			return true;
 
-		OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(key, value, default, ObservableDictionaryChangeType.Remove));
+		OnChanged?.Invoke(new Change(key, value, default, Change.Type.Remove));
 		return true;
 	}
 
@@ -109,7 +110,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 		for (int i = 0; i < buffer.Count; i++)
 		{
 			var pair = buffer[i];
-			OnChanged?.Invoke(new ObservableDictionaryChange<TKey, TValue>(pair.Key, pair.Value, default, ObservableDictionaryChangeType.Remove));
+			OnChanged?.Invoke(new Change(pair.Key, pair.Value, default, Change.Type.Remove));
 		}
 	}
 }
