@@ -24,7 +24,6 @@ public class ObservableList<T> : IEnumerable<T>
 	public bool Contains(T item) => _list.Contains(item);
 	public int IndexOf(T item) => _list.IndexOf(item);
 	public void CopyTo(T[] array, int index) => _list.CopyTo(array, index);
-	public IReadOnlyList<T> Items => _list;
 	public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 
