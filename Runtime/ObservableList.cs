@@ -103,6 +103,31 @@ public class ObservableList<T> : IEnumerable<T>
 		OnCollectionChanged?.Invoke(_list);
 	}
 
+	public void RemoveRange(IEnumerable<T> items, bool isNotify = true)
+	{
+		var itemList = items.ToList();
+		if (!isNotify)
+		{
+			foreach (var item in itemList)
+				_list.Remove(item);
+			return;
+		}
+
+		var removedItems = new List<T>();
+		foreach (var item in itemList)
+		{
+			if (_list.Remove(item))
+				removedItems.Add(item);
+		}
+
+		if (removedItems.Count == 0)
+			return;
+
+		foreach (var item in removedItems)
+			OnRemoved?.Invoke(item);
+		OnCollectionChanged?.Invoke(_list);
+	}
+
 	public void Clear(bool isNotify = true)
 	{
 		if (_list.Count == 0)
