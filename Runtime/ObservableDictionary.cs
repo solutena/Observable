@@ -4,7 +4,10 @@ using System.Collections.Generic;
 
 public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
 {
-	private readonly Dictionary<TKey, TValue> _dict = new();
+	private readonly Dictionary<TKey, TValue> _dict;
+
+	public ObservableDictionary() => _dict = new Dictionary<TKey, TValue>();
+	public ObservableDictionary(IDictionary<TKey, TValue> dictionary) => _dict = new Dictionary<TKey, TValue>(dictionary);
 
 	public delegate void AddedHandler(TKey key, TValue value);
 	public delegate void RemovedHandler(TKey key, TValue value);

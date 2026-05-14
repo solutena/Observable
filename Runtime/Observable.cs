@@ -6,12 +6,24 @@ public class Observable<T>
 	private T _value;
 	private readonly bool _ignoreNullNotify;
 
+	public Observable(bool ignoreNullNotify = true)
+	{
+		_value = default;
+		_ignoreNullNotify = ignoreNullNotify;
+	}
+
+	public Observable(T value, bool ignoreNullNotify = true)
+	{
+		_value = value;
+		_ignoreNullNotify = ignoreNullNotify;
+	}
+
 	public delegate void ChangedHandler(T previous, T current);
 	public delegate void CurrentChangedHandler(T current);
 
 	public event ChangedHandler OnChanged;
 	public event CurrentChangedHandler OnCurrentChanged;
-	
+
 	public T Value
 	{
 		get => _value;
@@ -32,18 +44,6 @@ public class Observable<T>
 			OnChanged?.Invoke(prev, _value);
 			OnCurrentChanged?.Invoke(_value);
 		}
-	}
-
-	public Observable(bool ignoreNullNotify = true)
-	{
-		_value = default;
-		_ignoreNullNotify = ignoreNullNotify;
-	}
-
-	public Observable(T value, bool ignoreNullNotify = true)
-	{
-		_value = value;
-		_ignoreNullNotify = ignoreNullNotify;
 	}
 
 	public void SetWithoutNotify(T value)
