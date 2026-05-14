@@ -24,9 +24,6 @@ public class Observable<T>
 	public event ChangedHandler OnChanged;
 	public event CurrentChangedHandler OnCurrentChanged;
 
-	public void NotifyChanged(T previous, T current) => OnChanged?.Invoke(previous, current);
-	public void NotifyCurrentChanged(T current) => OnCurrentChanged?.Invoke(current);
-
 	public T Value
 	{
 		get => _value;
