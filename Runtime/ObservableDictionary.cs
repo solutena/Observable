@@ -18,6 +18,11 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 	public event ReplacedHandler OnReplaced;
 	public event Action OnCollectionChanged;
 
+	public void NotifyAdded(TKey key, TValue value) => OnAdded?.Invoke(key, value);
+	public void NotifyRemoved(TKey key, TValue value) => OnRemoved?.Invoke(key, value);
+	public void NotifyReplaced(TKey key, TValue previous, TValue current) => OnReplaced?.Invoke(key, previous, current);
+	public void NotifyCollectionChanged() => OnCollectionChanged?.Invoke();
+
 	public TValue this[TKey key]
 	{
 		get => _dict[key];

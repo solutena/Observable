@@ -17,6 +17,10 @@ public class ObservableHashSet<T> : IEnumerable<T>
 	public event RemovedHandler OnRemoved;
 	public event Action OnCollectionChanged;
 
+	public void NotifyAdded(T item) => OnAdded?.Invoke(item);
+	public void NotifyRemoved(T item) => OnRemoved?.Invoke(item);
+	public void NotifyCollectionChanged() => OnCollectionChanged?.Invoke();
+
 	public int Count => _hashSet.Count;
 	public bool Contains(T item) => _hashSet.Contains(item);
 	public IEnumerator<T> GetEnumerator() => _hashSet.GetEnumerator();

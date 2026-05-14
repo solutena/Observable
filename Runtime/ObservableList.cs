@@ -18,6 +18,11 @@ public class ObservableList<T> : IEnumerable<T>
 	public event ReplacedHandler OnReplaced;
 	public event Action OnCollectionChanged;
 
+	public void NotifyAdded(T item) => OnAdded?.Invoke(item);
+	public void NotifyRemoved(T item) => OnRemoved?.Invoke(item);
+	public void NotifyReplaced(int index, T prev, T current) => OnReplaced?.Invoke(index, prev, current);
+	public void NotifyCollectionChanged() => OnCollectionChanged?.Invoke();
+
 	public T this[int index] => _list[index];
 	public int Count => _list.Count;
 	public bool Contains(T item) => _list.Contains(item);
