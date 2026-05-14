@@ -23,7 +23,11 @@ public class ObservableList<T> : IEnumerable<T>
 	public void NotifyReplaced(int index, T prev, T current) => OnReplaced?.Invoke(index, prev, current);
 	public void NotifyCollectionChanged() => OnCollectionChanged?.Invoke();
 
-	public T this[int index] => _list[index];
+	public T this[int index]
+	{
+		get => _list[index];
+		set => ReplaceAt(index, value);
+	}
 	public int Count => _list.Count;
 	public bool Contains(T item) => _list.Contains(item);
 	public int IndexOf(T item) => _list.IndexOf(item);
