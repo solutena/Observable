@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.WebSockets;
@@ -12,11 +12,10 @@ public class ObservableHashSet<T> : IEnumerable<T>
 
 	public delegate void AddedHandler(T item);
 	public delegate void RemovedHandler(T item);
-	public delegate void CollectionChangedHandler(IReadOnlyCollection<T> collection);
 
 	public event AddedHandler OnAdded;
 	public event RemovedHandler OnRemoved;
-	public event CollectionChangedHandler OnCollectionChanged;
+	public event Action OnCollectionChanged;
 
 	public int Count => _hashSet.Count;
 	public bool Contains(T item) => _hashSet.Contains(item);
@@ -32,7 +31,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			return true;
 
 		OnAdded?.Invoke(item);
-		OnCollectionChanged?.Invoke(_hashSet);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -45,7 +44,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			return true;
 
 		OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_hashSet);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -65,7 +64,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 
 		foreach (var item in copy)
 			OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_hashSet);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void UnionWith(IEnumerable<T> other, bool isNotify = true)
@@ -86,7 +85,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			OnAdded?.Invoke(item);
 		}
 		if (changed)
-			OnCollectionChanged?.Invoke(_hashSet);
+			OnCollectionChanged?.Invoke();
 	}
 
 	public void ExceptWith(IEnumerable<T> other, bool isNotify = true)
@@ -107,7 +106,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			OnRemoved?.Invoke(item);
 		}
 		if (changed)
-			OnCollectionChanged?.Invoke(_hashSet);
+			OnCollectionChanged?.Invoke();
 	}
 
 	public void IntersectWith(IEnumerable<T> other, bool isNotify = true)
@@ -134,7 +133,7 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			_hashSet.Remove(item);
 			OnRemoved?.Invoke(item);
 		}
-		OnCollectionChanged?.Invoke(_hashSet);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void SymmetricExceptWith(IEnumerable<T> other, bool isNotify = true)
@@ -161,6 +160,6 @@ public class ObservableHashSet<T> : IEnumerable<T>
 			}
 		}
 		if (changed)
-			OnCollectionChanged?.Invoke(_hashSet);
+			OnCollectionChanged?.Invoke();
 	}
 }

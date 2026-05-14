@@ -12,12 +12,11 @@ public class ObservableList<T> : IEnumerable<T>
 	public delegate void AddedHandler(T item);
 	public delegate void RemovedHandler(T item);
 	public delegate void ReplacedHandler(int index, T previous, T current);
-	public delegate void CollectionChangedHandler(IReadOnlyList<T> collection);
 
 	public event AddedHandler OnAdded;
 	public event RemovedHandler OnRemoved;
 	public event ReplacedHandler OnReplaced;
-	public event CollectionChangedHandler OnCollectionChanged;
+	public event Action OnCollectionChanged;
 
 	public T this[int index] => _list[index];
 	public int Count => _list.Count;
@@ -35,7 +34,7 @@ public class ObservableList<T> : IEnumerable<T>
 			return;
 
 		OnAdded?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void Insert(int index, T item, bool isNotify = true)
@@ -46,7 +45,7 @@ public class ObservableList<T> : IEnumerable<T>
 			return;
 
 		OnAdded?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void AddRange(IEnumerable<T> items, bool isNotify = true)
@@ -58,7 +57,7 @@ public class ObservableList<T> : IEnumerable<T>
 
 		foreach (var item in items)
 			OnAdded?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public bool ReplaceAt(int index, T item, bool isNotify = true)
@@ -74,7 +73,7 @@ public class ObservableList<T> : IEnumerable<T>
 			return true;
 
 		OnReplaced?.Invoke(index, prev, item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -87,7 +86,7 @@ public class ObservableList<T> : IEnumerable<T>
 			return true;
 
 		OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -100,7 +99,7 @@ public class ObservableList<T> : IEnumerable<T>
 			return;
 
 		OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void RemoveRange(IEnumerable<T> items, bool isNotify = true)
@@ -125,7 +124,7 @@ public class ObservableList<T> : IEnumerable<T>
 
 		foreach (var item in removedItems)
 			OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 
 	public void Clear(bool isNotify = true)
@@ -144,6 +143,6 @@ public class ObservableList<T> : IEnumerable<T>
 
 		foreach (var item in prevList)
 			OnRemoved?.Invoke(item);
-		OnCollectionChanged?.Invoke(_list);
+		OnCollectionChanged?.Invoke();
 	}
 }

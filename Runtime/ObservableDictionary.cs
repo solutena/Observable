@@ -16,6 +16,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 	public event AddedHandler OnAdded;
 	public event RemovedHandler OnRemoved;
 	public event ReplacedHandler OnReplaced;
+	public event Action OnCollectionChanged;
 
 	public TValue this[TKey key]
 	{
@@ -25,34 +26,28 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 	public int Count => _dict.Count;
 	public bool ContainsKey(TKey key) => _dict.ContainsKey(key);
 	public bool TryGetValue(TKey key, out TValue value) => _dict.TryGetValue(key, out value);
-	public Dictionary<TKey, TValue>.KeyCollection Keys => _dict.Keys;
-	public Dictionary<TKey, TValue>.ValueCollection Values => _dict.Values;
+	public IEnumerable<TKey> Keys => _dict.Keys;
+	public IEnumerable<TValue> Values => _dict.Values;
 	public TValue GetValueOrDefault(TKey key) => _dict.TryGetValue(key, out var value) ? value : default;
 	public TValue GetValueOrDefault(TKey key, TValue defaultValue) => _dict.TryGetValue(key, out var value) ? value : defaultValue;
 	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dict.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator() => _dict.GetEnumerator();
 
-	public bool Add(TKey key, TValue value, bool isNotify = true)
+	public void Add(TKey key, TValue value)
 	{
-		if (_dict.ContainsKey(key))
-			return false;
-
-		_dict.Add(key, value);
-
-		if (isNotify)
-			OnAdded?.Invoke(key, value);
-		return true;
+		if (!TryAdd(key, value))
+			throw new ArgumentException($"An element with the key '{key}' already exists.", nameof(key));
 	}
 
 	public bool TryAdd(TKey key, TValue value, bool isNotify = true)
 	{
-		if (_dict.ContainsKey(key))
+		if (!_dict.TryAdd(key, value))
 			return false;
-
-		_dict.Add(key, value);
-
-		if (isNotify)
-			OnAdded?.Invoke(key, value);
+		
+		if (!isNotify)
+			return true;
+		OnAdded?.Invoke(key, value);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -65,28 +60,32 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 
 			_dict[key] = value;
 
-			if (isNotify)
-				OnReplaced?.Invoke(key, prev, value);
+			if (!isNotify)
+				return true;
+			OnReplaced?.Invoke(key, prev, value);
+			OnCollectionChanged?.Invoke();
 			return true;
 		}
 
 		_dict.Add(key, value);
 
-		if (isNotify)
-			OnAdded?.Invoke(key, value);
+		if (!isNotify)
+			return true;
+		OnAdded?.Invoke(key, value);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
 	public bool Remove(TKey key, bool isNotify = true) => Remove(key, out _, isNotify);
 	public bool Remove(TKey key, out TValue value, bool isNotify = true)
 	{
-		if (!_dict.TryGetValue(key, out value))
+		if (!_dict.Remove(key, out value))
 			return false;
 
-		_dict.Remove(key);
-
-		if (isNotify)
-			OnRemoved?.Invoke(key, value);
+		if (!isNotify)
+			return true;
+		OnRemoved?.Invoke(key, value);
+		OnCollectionChanged?.Invoke();
 		return true;
 	}
 
@@ -95,7 +94,7 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 		if (_dict.Count == 0)
 			return;
 
-		if (isNotify == false)
+		if (!isNotify)
 		{
 			_dict.Clear();
 			return;
@@ -108,5 +107,6 @@ public class ObservableDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey,
 			var pair = buffer[i];
 			OnRemoved?.Invoke(pair.Key, pair.Value);
 		}
+		OnCollectionChanged?.Invoke();
 	}
 }
