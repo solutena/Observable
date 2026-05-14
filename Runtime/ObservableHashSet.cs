@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 
 public class ObservableHashSet<T> : IEnumerable<T>
 {
@@ -67,35 +68,67 @@ public class ObservableHashSet<T> : IEnumerable<T>
 		OnCollectionChanged?.Invoke(_hashSet);
 	}
 
-	public void UnionWith(IEnumerable<T> other)
+	public void UnionWith(IEnumerable<T> other, bool isNotify = true)
 	{
+		if (!isNotify)
+		{
+			_hashSet.UnionWith(other);
+			return;
+		}
+
+		bool changed = false;
 		foreach (var item in other)
 		{
-			if (_hashSet.Add(item))
-				OnAdded?.Invoke(item);
+			if (!_hashSet.Add(item))
+				continue;
+
+			changed = true;
+			OnAdded?.Invoke(item);
 		}
-		OnCollectionChanged?.Invoke(_hashSet);
+		if (changed)
+			OnCollectionChanged?.Invoke(_hashSet);
 	}
 
-	public void ExceptWith(IEnumerable<T> other)
+	public void ExceptWith(IEnumerable<T> other, bool isNotify = true)
 	{
+		if (!isNotify)
+		{
+			_hashSet.ExceptWith(other);
+			return;
+		}
+
+		bool changed = false;
 		foreach (var item in other)
 		{
-			if (_hashSet.Remove(item))
-				OnRemoved?.Invoke(item);
+			if (!_hashSet.Remove(item))
+				continue;
+
+			changed = true;
+			OnRemoved?.Invoke(item);
 		}
-		OnCollectionChanged?.Invoke(_hashSet);
+		if (changed)
+			OnCollectionChanged?.Invoke(_hashSet);
 	}
 
-	public void IntersectWith(IEnumerable<T> other)
+	public void IntersectWith(IEnumerable<T> other, bool isNotify = true)
 	{
-		var toKeep = new HashSet<T>(other);
+		if (!isNotify)
+		{
+			_hashSet.IntersectWith(other);
+			return;
+		}
+
+		var otherSet = other as HashSet<T> ?? new HashSet<T>(other);
 		var removed = new List<T>();
 		foreach (var item in _hashSet)
 		{
-			if (!toKeep.Contains(item))
+			if (!otherSet.Contains(item))
 				removed.Add(item);
 		}
+
+		if (removed.Count == 0)
+			return;
+
 		foreach (var item in removed)
 		{
 			_hashSet.Remove(item);
@@ -104,18 +137,30 @@ public class ObservableHashSet<T> : IEnumerable<T>
 		OnCollectionChanged?.Invoke(_hashSet);
 	}
 
-	public void SymmetricExceptWith(IEnumerable<T> other)
+	public void SymmetricExceptWith(IEnumerable<T> other, bool isNotify = true)
 	{
-		foreach (var item in other)
+		if (!isNotify)
 		{
-			if (!_hashSet.Add(item))
+			_hashSet.SymmetricExceptWith(other);
+			return;
+		}
+
+		var otherSet = other as HashSet<T> ?? new HashSet<T>(other);
+		bool changed = false;
+		foreach (var item in otherSet)
+		{
+			if (_hashSet.Remove(item))
 			{
-				_hashSet.Remove(item);
+				changed = true;
 				OnRemoved?.Invoke(item);
 			}
-			else
+			else if (_hashSet.Add(item))
+			{
+				changed = true;
 				OnAdded?.Invoke(item);
+			}
 		}
-		OnCollectionChanged?.Invoke(_hashSet);
+		if (changed)
+			OnCollectionChanged?.Invoke(_hashSet);
 	}
 }
