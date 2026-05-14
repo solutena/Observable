@@ -105,7 +105,7 @@ public class ObservableList<T> : IEnumerable<T>
 
 	public void RemoveRange(IEnumerable<T> items, bool isNotify = true)
 	{
-		var itemList = items.ToList();
+		var itemList = new List<T>(items);
 		if (!isNotify)
 		{
 			foreach (var item in itemList)
