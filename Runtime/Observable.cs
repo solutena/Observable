@@ -41,8 +41,8 @@ public class Observable<T>
 			var prev = _value;
 			_value = value;
 
-			OnChanged?.Invoke(prev, _value);
-			OnCurrentChanged?.Invoke(_value);
+			OnChangedWithPrevious?.Invoke(prev, _value);
+			OnChanged?.Invoke(_value);
 		}
 	}
 
