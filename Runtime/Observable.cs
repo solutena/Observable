@@ -32,7 +32,7 @@ public class Observable<T>
 			if (EqualityComparer<T>.Default.Equals(_value, value))
 				return;
 
-			if(!_ignoreNullNotify && value is null)
+			if (_ignoreNullNotify && value is null)
 			{
 				_value = value;
 				return;
