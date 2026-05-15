@@ -18,11 +18,11 @@ public class Observable<T>
 		_ignoreNullNotify = ignoreNullNotify;
 	}
 
-	public delegate void ChangedHandler(T previous, T current);
-	public delegate void CurrentChangedHandler(T current);
+	public delegate void ChangedHandler(T current);
+	public delegate void ChangedWithPreviousHandler(T previous, T current);
 
 	public event ChangedHandler OnChanged;
-	public event CurrentChangedHandler OnCurrentChanged;
+	public event ChangedWithPreviousHandler OnChangedWithPrevious;
 
 	public T Value
 	{
